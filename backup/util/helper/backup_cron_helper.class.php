@@ -401,7 +401,8 @@ abstract class backup_cron_automated_helper {
                 'badges' => 'backup_auto_badges',
                 'completion_information' => 'backup_auto_userscompletion',
                 'logs' => 'backup_auto_logs',
-                'histories' => 'backup_auto_histories'
+                'histories' => 'backup_auto_histories',
+                'groups' => 'backup_auto_groups'
             );
             foreach ($settings as $setting => $configsetting) {
                 if ($bc->get_plan()->setting_exists($setting)) {

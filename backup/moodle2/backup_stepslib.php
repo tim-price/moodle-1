@@ -309,6 +309,8 @@ class backup_module_structure_step extends backup_structure_step {
 
     protected function define_structure() {
 
+        $groupinfo = $this->get_setting_value('groups');
+
         // Define each element separated
 
         $module = new backup_nested_element('module', array('id', 'version'), array(
@@ -340,12 +342,25 @@ class backup_module_structure_step extends backup_structure_step {
         $availinfo->add_child($availabilityfield);
 
         // Set the sources
-        $module->set_source_sql('
-            SELECT cm.*, m.version, m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
-              FROM {course_modules} cm
-              JOIN {modules} m ON m.id = cm.module
-              JOIN {course_sections} s ON s.id = cm.section
-             WHERE cm.id = ?', array(backup::VAR_MODID));
+        if($groupinfo) {
+            $module->set_source_sql('
+                SELECT cm.*, m.version, m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
+                  FROM {course_modules} cm
+                  JOIN {modules} m ON m.id = cm.module
+                  JOIN {course_sections} s ON s.id = cm.section
+                 WHERE cm.id = ?', array(backup::VAR_MODID));
+        } else {
+            $module->set_source_sql('
+                SELECT cm.id, cm.course, cm.module, cm.instance, cm.section, cm.idnumber, cm.added, cm.score,
+                    cm.indent, cm.visible, cm.visibleold, 0 AS groupmode, 0 AS groupingid, 0 AS groupmembersonly,
+                    cm.completion, cm.completiongradeitemnumber, cm.completionview, cm.completionexpected,
+                    cm.availablefrom, cm.availableuntil, cm.showavailability, cm.showdescription, m.version,
+                    m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
+                  FROM {course_modules} cm
+                  JOIN {modules} m ON m.id = cm.module
+                  JOIN {course_sections} s ON s.id = cm.section
+                 WHERE cm.id = ?', array(backup::VAR_MODID));
+        }
 
         $availability->set_source_table('course_modules_availability', array('coursemoduleid' => backup::VAR_MODID));
         $availabilityfield->set_source_sql('
@@ -354,8 +369,10 @@ class backup_module_structure_step extends backup_structure_step {
          LEFT JOIN {user_info_field} uif ON uif.id = cmaf.customfieldid
              WHERE cmaf.coursemoduleid = ?', array(backup::VAR_MODID));
 
-        // Define annotations
-        $module->annotate_ids('grouping', 'groupingid');
+        // Define annotations, but do not annotate groupings if configured
+        if($groupinfo) {
+            $module->annotate_ids('grouping', 'groupingid');
+        }
 
         // Return the root element ($module)
         return $module;
@@ -1086,7 +1103,9 @@ class backup_groups_structure_step extends backup_structure_step {
     protected function define_structure() {
 
         // To know if we are including users
-        $users = $this->get_setting_value('users');
+        $userinfo = $this->get_setting_value('users');
+        $groupinfo = $this->get_setting_value('groups');
+
 
         // Define each element separated
 
@@ -1125,27 +1144,30 @@ class backup_groups_structure_step extends backup_structure_step {
         $groupinggroups->add_child($groupinggroup);
 
         // Define sources
-
-        $group->set_source_sql("
-            SELECT g.*
-              FROM {groups} g
-              JOIN {backup_ids_temp} bi ON g.id = bi.itemid
-             WHERE bi.backupid = ?
-               AND bi.itemname = 'groupfinal'", array(backup::VAR_BACKUPID));
+        if($groupinfo) {
+            $group->set_source_sql("
+                SELECT g.*
+                  FROM {groups} g
+                  JOIN {backup_ids_temp} bi ON g.id = bi.itemid
+                 WHERE bi.backupid = ?
+                   AND bi.itemname = 'groupfinal'", array(backup::VAR_BACKUPID));
+        }
 
         // This only happens if we are including users
-        if ($users) {
+        if ($userinfo) {
             $member->set_source_table('groups_members', array('groupid' => backup::VAR_PARENTID));
         }
 
-        $grouping->set_source_sql("
-            SELECT g.*
-              FROM {groupings} g
-              JOIN {backup_ids_temp} bi ON g.id = bi.itemid
-             WHERE bi.backupid = ?
-               AND bi.itemname = 'groupingfinal'", array(backup::VAR_BACKUPID));
+        if($groupinfo) {
+            $grouping->set_source_sql("
+                SELECT g.*
+                  FROM {groupings} g
+                  JOIN {backup_ids_temp} bi ON g.id = bi.itemid
+                 WHERE bi.backupid = ?
+                   AND bi.itemname = 'groupingfinal'", array(backup::VAR_BACKUPID));
 
-        $groupinggroup->set_source_table('groupings_groups', array('groupingid' => backup::VAR_PARENTID));
+            $groupinggroup->set_source_table('groupings_groups', array('groupingid' => backup::VAR_PARENTID));
+        }
 
         // Define id annotations (as final)
 

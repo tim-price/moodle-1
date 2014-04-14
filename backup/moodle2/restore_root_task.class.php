@@ -247,10 +247,10 @@ class restore_root_task extends restore_task {
         $this->add_setting($gradehistories);
         $users->add_dependency($gradehistories);
 
-        // Define groups
-        $defaultvalue = false;                      // Safer default
+        // Define groups and groupings.
+        $defaultvalue = false;                      // Safer default.
         $changeable = false;
-        if (isset($rootsettings['groups']) && $rootsettings['groups']) { // Only enabled when available
+        if (isset($rootsettings['groups']) && $rootsettings['groups']) { // Only enabled when available.
             $defaultvalue = true;
             $changeable = true;
         }

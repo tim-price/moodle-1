@@ -158,7 +158,6 @@ class backup_root_task extends backup_task {
         $questionbank->set_ui(new backup_setting_ui_checkbox($questionbank, get_string('rootsettingquestionbank', 'backup')));
         $this->add_setting($questionbank);
 
-        // Add setting here for including groups/grouping
         $groups = new backup_groups_setting('groups', base_setting::IS_BOOLEAN, true);
         $groups->set_ui(new backup_setting_ui_checkbox($groups, get_string('rootsettinggroups', 'backup')));
         $this->add_setting($groups);

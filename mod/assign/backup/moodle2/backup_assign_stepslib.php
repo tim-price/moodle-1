@@ -41,6 +41,7 @@ class backup_assign_activity_structure_step extends backup_activity_structure_st
 
         // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
+        // To know if we are including groups/groupings information.
         $groupinfo = $this->get_setting_value('groups');
 
         // Define each element separated.
@@ -145,7 +146,7 @@ class backup_assign_activity_structure_step extends backup_activity_structure_st
         $grade->annotate_ids('user', 'userid');
         $grade->annotate_ids('user', 'grader');
 
-        //do not annotate groups/groupings if not requested
+        // Only annotate groups/groupings information if requested.
         if ($groupinfo) {
             $assign->annotate_ids('grouping', 'teamsubmissiongroupingid');
             $submission->annotate_ids('group', 'groupid');

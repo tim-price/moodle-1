@@ -350,7 +350,9 @@ class backup_module_structure_step extends backup_structure_step {
 
         // Set the sources
         $concat = $DB->sql_concat("'mod_'", 'm.name');
-        if($groupinfo) {
+        // If groups are not set to be backed up we can ignore setting the groupmode, groupingid and
+        // the groupmembersonly flag when backing up the module.
+        if ($groupinfo) {
             $module->set_source_sql('
                 SELECT cm.*, cp.value AS version, m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
                   FROM {course_modules} cm
@@ -361,10 +363,10 @@ class backup_module_structure_step extends backup_structure_step {
         } else {
             $module->set_source_sql('
                 SELECT cm.id, cm.course, cm.module, cm.instance, cm.section, cm.idnumber, cm.added, cm.score,
-                    cm.indent, cm.visible, cm.visibleold, 0 AS groupmode, 0 AS groupingid, 0 AS groupmembersonly,
-                    cm.completion, cm.completiongradeitemnumber, cm.completionview, cm.completionexpected,
-                    cm.availablefrom, cm.availableuntil, cm.showavailability, cm.showdescription, cp.value AS version,
-                    m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
+                       cm.indent, cm.visible, cm.visibleold, 0 AS groupmode, 0 AS groupingid, 0 AS groupmembersonly,
+                       cm.completion, cm.completiongradeitemnumber, cm.completionview, cm.completionexpected,
+                       cm.availablefrom, cm.availableuntil, cm.showavailability, cm.showdescription, cp.value AS version,
+                       m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
                   FROM {course_modules} cm
                   JOIN {modules} m ON m.id = cm.module
                   JOIN {config_plugins} cp ON cp.plugin = $concat AND cp.name = 'version'
@@ -379,8 +381,8 @@ class backup_module_structure_step extends backup_structure_step {
          LEFT JOIN {user_info_field} uif ON uif.id = cmaf.customfieldid
              WHERE cmaf.coursemoduleid = ?', array(backup::VAR_MODID));
 
-        // Define annotations, but do not annotate groupings if configured
-        if($groupinfo) {
+        // Define annotations, but only annotate groups if configured.
+        if ($groupinfo) {
             $module->annotate_ids('grouping', 'groupingid');
         }
 
@@ -1112,8 +1114,9 @@ class backup_groups_structure_step extends backup_structure_step {
 
     protected function define_structure() {
 
-        // To know if we are including users
+        // To know if we are including users.
         $userinfo = $this->get_setting_value('users');
+        // To know if we are including groups and groupings.
         $groupinfo = $this->get_setting_value('groups');
 
 
@@ -1154,7 +1157,9 @@ class backup_groups_structure_step extends backup_structure_step {
         $groupinggroups->add_child($groupinggroup);
 
         // Define sources
-        if($groupinfo) {
+
+        // This only happens if we are including groups/groupings.
+        if ($groupinfo) {
             $group->set_source_sql("
                 SELECT g.*
                   FROM {groups} g
@@ -1168,14 +1173,14 @@ class backup_groups_structure_step extends backup_structure_step {
             $member->set_source_table('groups_members', array('groupid' => backup::VAR_PARENTID));
         }
 
-        if($groupinfo) {
+        // This only happens if we are including groups/groupings.
+        if ($groupinfo) {
             $grouping->set_source_sql("
                 SELECT g.*
                   FROM {groupings} g
                   JOIN {backup_ids_temp} bi ON g.id = bi.itemid
                  WHERE bi.backupid = ?
                    AND bi.itemname = 'groupingfinal'", array(backup::VAR_BACKUPID));
-
             $groupinggroup->set_source_table('groupings_groups', array('groupingid' => backup::VAR_PARENTID));
         }
 

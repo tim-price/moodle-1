@@ -246,5 +246,17 @@ class restore_root_task extends restore_task {
         $gradehistories->get_ui()->set_changeable($changeable);
         $this->add_setting($gradehistories);
         $users->add_dependency($gradehistories);
+
+        // Define groups
+        $defaultvalue = false;                      // Safer default
+        $changeable = false;
+        if (isset($rootsettings['groups']) && $rootsettings['groups']) { // Only enabled when available
+            $defaultvalue = true;
+            $changeable = true;
+        }
+        $groups = new restore_groups_setting('groups', base_setting::IS_BOOLEAN, $defaultvalue);
+        $groups->set_ui(new backup_setting_ui_checkbox($groups, get_string('rootsettinggroups', 'backup')));
+        $groups->get_ui()->set_changeable($changeable);
+        $this->add_setting($groups);
     }
 }

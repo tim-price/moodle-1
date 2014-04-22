@@ -33,6 +33,10 @@ defined('MOODLE_INTERNAL') || die();
  */
 class restore_assign_activity_structure_step extends restore_activity_structure_step {
 
+    // Store whether submission details should be included. Details may not be included if the
+    // this is a team submission, but groups/grouping information was not included in the backup.
+    protected $includesubmission = true;
+
     /**
      * Define the structure of the restore workflow.
      *
@@ -80,6 +84,14 @@ class restore_assign_activity_structure_step extends restore_activity_structure_
         $data->timemodified = $this->apply_date_offset($data->timemodified);
         $data->allowsubmissionsfromdate = $this->apply_date_offset($data->allowsubmissionsfromdate);
         $data->duedate = $this->apply_date_offset($data->duedate);
+
+        // If this is a team submission, but there is no group info we need to flag that the submission
+        // information should not be included. It should not be restored.
+        $groupinfo = $this->task->get_setting_value('groups');
+        if ($data->teamsubmission && !$groupinfo) {
+            $this->includesubmission = false;
+        }
+
         if (!empty($data->teamsubmissiongroupingid)) {
             $data->teamsubmissiongroupingid = $this->get_mappingid('grouping',
                                                                    $data->teamsubmissiongroupingid);
@@ -136,11 +148,13 @@ class restore_assign_activity_structure_step extends restore_activity_structure_
             $data->groupid = 0;
         }
 
-        $newitemid = $DB->insert_record('assign_submission', $data);
+        if ($this->includesubmission) {
+            $newitemid = $DB->insert_record('assign_submission', $data);
 
-        // Note - the old contextid is required in order to be able to restore files stored in
-        // sub plugin file areas attached to the submissionid.
-        $this->set_mapping('submission', $oldid, $newitemid, false, null, $this->task->get_old_contextid());
+            // Note - the old contextid is required in order to be able to restore files stored in
+            // sub plugin file areas attached to the submissionid.
+            $this->set_mapping('submission', $oldid, $newitemid, false, null, $this->task->get_old_contextid());
+        }
     }
 
     /**

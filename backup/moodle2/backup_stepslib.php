@@ -353,15 +353,15 @@ class backup_module_structure_step extends backup_structure_step {
         // If groups are not set to be backed up we can ignore setting the groupmode, groupingid and
         // the groupmembersonly flag when backing up the module.
         if ($groupinfo) {
-            $module->set_source_sql('
+            $module->set_source_sql("
                 SELECT cm.*, cp.value AS version, m.name AS modulename, s.id AS sectionid, s.section AS sectionnumber
                   FROM {course_modules} cm
                   JOIN {modules} m ON m.id = cm.module
                   JOIN {config_plugins} cp ON cp.plugin = $concat AND cp.name = 'version'
                   JOIN {course_sections} s ON s.id = cm.section
-                 WHERE cm.id = ?', array(backup::VAR_MODID));
+                 WHERE cm.id = ?", array(backup::VAR_MODID));
         } else {
-            $module->set_source_sql('
+            $module->set_source_sql("
                 SELECT cm.id, cm.course, cm.module, cm.instance, cm.section, cm.idnumber, cm.added, cm.score,
                        cm.indent, cm.visible, cm.visibleold, 0 AS groupmode, 0 AS groupingid, 0 AS groupmembersonly,
                        cm.completion, cm.completiongradeitemnumber, cm.completionview, cm.completionexpected,
@@ -371,7 +371,7 @@ class backup_module_structure_step extends backup_structure_step {
                   JOIN {modules} m ON m.id = cm.module
                   JOIN {config_plugins} cp ON cp.plugin = $concat AND cp.name = 'version'
                   JOIN {course_sections} s ON s.id = cm.section
-                 WHERE cm.id = ?', array(backup::VAR_MODID));
+                 WHERE cm.id = ?", array(backup::VAR_MODID));
         }
 
         $availability->set_source_table('course_modules_availability', array('coursemoduleid' => backup::VAR_MODID));

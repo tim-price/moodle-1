@@ -41,6 +41,7 @@ class backup_assign_activity_structure_step extends backup_activity_structure_st
 
         // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
+        $groupinfo = $this->get_setting_value('groups');
 
         // Define each element separated.
         $assign = new backup_nested_element('assign', array('id'),
@@ -141,10 +142,15 @@ class backup_assign_activity_structure_step extends backup_activity_structure_st
         // Define id annotations.
         $userflag->annotate_ids('user', 'userid');
         $submission->annotate_ids('user', 'userid');
-        $submission->annotate_ids('group', 'groupid');
+
         $grade->annotate_ids('user', 'userid');
         $grade->annotate_ids('user', 'grader');
-        $assign->annotate_ids('grouping', 'teamsubmissiongroupingid');
+
+        //do not annotate groups/groupings if not requested
+        if ($groupinfo) {
+            $assign->annotate_ids('grouping', 'teamsubmissiongroupingid');
+            $submission->annotate_ids('group', 'groupid');
+        }
 
         // Define file annotations.
         // This file area hasn't itemid.

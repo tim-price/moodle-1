@@ -236,6 +236,7 @@ $string['rootsettinguserscompletion'] = 'Include user completion details';
 $string['rootsettingquestionbank'] = 'Include question bank';
 $string['rootsettinglogs'] = 'Include course logs';
 $string['rootsettinggradehistories'] = 'Include grade history';
+$string['rootsettinggroups'] = 'Include groups';
 $string['rootsettingimscc1'] = 'Convert to IMS Common Cartridge 1.0';
 $string['rootsettingimscc11'] = 'Convert to IMS Common Cartridge 1.1';
 $string['storagecourseonly'] = 'Course backup filearea';

@@ -1119,9 +1119,8 @@ class backup_groups_structure_step extends backup_structure_step {
         // To know if we are including groups and groupings.
         $groupinfo = $this->get_setting_value('groups');
 
-
-        // Define each element separated
-
+        // Define each element separate.
+        
         $groups = new backup_nested_element('groups');
 
         $group = new backup_nested_element('group', array('id'), array(

@@ -1145,7 +1145,7 @@ class backup_groups_structure_step extends backup_structure_step {
                    AND bi.itemname = 'groupingfinal'", array(backup::VAR_BACKUPID));
             $groupinggroup->set_source_table('groupings_groups', array('groupingid' => backup::VAR_PARENTID));
 
-            // This only happens if we are including users
+            // This only happens if we are including users.
             if ($userinfo) {
                 $member->set_source_table('groups_members', array('groupid' => backup::VAR_PARENTID));
             }
